@@ -1,6 +1,6 @@
 streamlit
 langchain
 PyPDF2
-google-generativeai
+langchain-google-genai==1.0.10
 faiss-cpu
 langchain_google_genai
