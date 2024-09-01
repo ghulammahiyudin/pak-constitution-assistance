@@ -8,12 +8,9 @@ from langchain.prompts import PromptTemplate
 import google.generativeai as genai
 import streamlit as st
 
-
-
 # Configure Google Generative AI API key
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=GOOGLE_API_KEY)
-
 
 # Cache data functions to optimize loading
 @st.cache_data
@@ -33,14 +30,12 @@ def get_pdf_text(pdf_path):
             text += page_text
     return text
 
-
 @st.cache_data
 def get_text_chunks_with_metadata(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
     # Adding metadata
     return [(chunk, {"source": f"Chunk {i+1}"}) for i, chunk in enumerate(chunks)]
-
 
 @st.cache_resource
 def load_or_create_vector_store(pdf_path):
@@ -58,7 +53,6 @@ def load_or_create_vector_store(pdf_path):
                                         metadata=[metadata for _, metadata in text_chunks_with_metadata])
         vector_store.save_local("faiss_index")
     return vector_store
-
 
 def get_conversational_chain():
     prompt_template = """
@@ -78,7 +72,6 @@ def get_conversational_chain():
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
 
     return chain
-
 
 # Function to handle user input and generate response
 def user_input(user_question, chain, vector_store, chat_history):
@@ -100,7 +93,6 @@ def user_input(user_question, chain, vector_store, chat_history):
         st.write(f"**:bust_in_silhouette: You ({i + 1}):** {question}", unsafe_allow_html=True)
         st.write(f"**:robot_face: AI ({i + 1}):** {answer}", unsafe_allow_html=True)
         st.write(f"**Source** {metadata}", unsafe_allow_html=True)
-
 
 # Main function for Streamlit app
 def main():
@@ -158,7 +150,6 @@ def main():
     st.markdown(
         "<p style='text-align: center; color: #888;'>Design & Developed with 💚</p>",
         unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
