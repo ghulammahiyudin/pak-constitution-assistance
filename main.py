@@ -10,6 +10,7 @@ from langchain.prompts import PromptTemplate
 import google.generativeai as genai
 import streamlit as st
 
+
 # Configure Google Generative AI API key
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=GOOGLE_API_KEY)
