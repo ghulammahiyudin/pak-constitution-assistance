@@ -5,3 +5,4 @@ google-generativeai
 faiss-cpu
 langchain_google_genai
  google.generativeai
+langchain-google-genai
