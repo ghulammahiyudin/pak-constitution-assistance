@@ -1,7 +1,9 @@
 import os
 from PyPDF2 import PdfReader
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
+from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
+from langchain_google_genai.google_vector_store import GoogleVectorStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
