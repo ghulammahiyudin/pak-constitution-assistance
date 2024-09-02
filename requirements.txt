@@ -1,6 +1,5 @@
-streamlit
-langchain
 PyPDF2
-faiss-cpu
-langchain-google-genai
-google-generativeai
+langchain
+google-generative-ai
+faiss-python
+streamlit
