@@ -1,5 +1,5 @@
 PyPDF2
 langchain
 google-generative-ai
-faiss-python
+faiss-cpu
 streamlit
