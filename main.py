@@ -1,15 +1,12 @@
 import os
 from PyPDF2 import PdfReader
-from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
-from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
-from langchain_google_genai.google_vector_store import GoogleVectorStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 import google.generativeai as genai
 import streamlit as st
-
 
 # Configure Google Generative AI API key
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
@@ -34,11 +31,10 @@ def get_pdf_text(pdf_path):
     return text
 
 @st.cache_data
-def get_text_chunks_with_metadata(text):
+def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
-    # Adding metadata
-    return [(chunk, {"source": f"Chunk {i+1}"}) for i, chunk in enumerate(chunks)]
+    return chunks
 
 @st.cache_resource
 def load_or_create_vector_store(pdf_path):
@@ -49,11 +45,9 @@ def load_or_create_vector_store(pdf_path):
     else:
         # Create new vector store
         raw_text = get_pdf_text(pdf_path)
-        text_chunks_with_metadata = get_text_chunks_with_metadata(raw_text)
+        text_chunks = get_text_chunks(raw_text)
         embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
-        vector_store = FAISS.from_texts([chunk for chunk, _ in text_chunks_with_metadata],
-                                        embedding=embeddings,
-                                        metadata=[metadata for _, metadata in text_chunks_with_metadata])
+        vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
         vector_store.save_local("faiss_index")
     return vector_store
 
@@ -84,18 +78,14 @@ def user_input(user_question, chain, vector_store, chat_history):
         return_only_outputs=True
     )
 
-    # Extract metadata (e.g., source context)
-    metadata = "Sources: " + ", ".join([doc.metadata.get("source", "Unknown") for doc in docs])
-
-    # Append the question, answer, and metadata to the chat history
-    chat_history.append((user_question, response['output_text'], metadata))
+    # Append the question and answer to the chat history
+    chat_history.append((user_question, response['output_text']))
 
     # Display the entire chat history
-    for i, (question, answer, metadata) in enumerate(chat_history):
+    for i, (question, answer) in enumerate(chat_history):
         st.write("---")
         st.write(f"**:bust_in_silhouette: You ({i + 1}):** {question}", unsafe_allow_html=True)
         st.write(f"**:robot_face: AI ({i + 1}):** {answer}", unsafe_allow_html=True)
-        st.write(f"**Source** {metadata}", unsafe_allow_html=True)
 
 # Main function for Streamlit app
 def main():
